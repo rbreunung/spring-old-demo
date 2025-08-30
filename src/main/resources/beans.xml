@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:int="http://www.springframework.org/schema/integration"
+    xmlns:int-file="http://www.springframework.org/schema/integration/file"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/integration https://www.springframework.org/schema/integration/spring-integration-5.2.xsd
+                        http://www.springframework.org/schema/integration/file https://www.springframework.org/schema/integration/file/spring-integration-file-5.2.xsd">
+
+
+    <bean id="myService" class="de.antrophos.spring.demo.old.MyService">
+        <constructor-arg ref="watchedDirectory" />
+    </bean>
+
+    <bean id="watchedDirectory" class="java.lang.String">
+        <constructor-arg value="${watched.directory}" />
+    </bean>
+
+    <int:channel id="inputFile" />
+    <int:publish-subscribe-channel id="inputString" />
+
+    <int-file:inbound-channel-adapter directory="${watched.directory}" channel="inputFile"
+        auto-startup="true" prevent-duplicates="true"></int-file:inbound-channel-adapter>
+
+    <int-file:file-to-string-transformer id="FileReader" input-channel="inputFile" delete-files="true" output-channel="inputString"/>
+
+    <int:service-activator input-channel="inputString" ref="myService" method="receiveMessage" />
+    <int:transformer input-channel="inputString" output-channel="outputString" expression="'Processed: ' + payload" />
+</beans>
