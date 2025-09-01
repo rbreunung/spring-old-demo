@@ -1,6 +1,9 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
     "cSpell.words": [
-        "springframework"
-    ]
+        "jdbc",
+        "springframework",
+        "testdb"
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

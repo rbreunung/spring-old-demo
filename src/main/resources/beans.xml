@@ -7,9 +7,21 @@
                         http://www.springframework.org/schema/integration https://www.springframework.org/schema/integration/spring-integration-5.2.xsd
                         http://www.springframework.org/schema/integration/file https://www.springframework.org/schema/integration/file/spring-integration-file-5.2.xsd">
 
+    <bean id="dataSourceFail" class="java.lang.Boolean">
+        <constructor-arg value="${application.datasource.fail:false}" />
+    </bean>
+    <bean id="myDataSource" class="de.antrophos.spring.demo.old.DataSourceInitialization"
+        factory-method="getMyDataSource">
+        <constructor-arg ref="dataSourceFail" />
+    </bean>
+    <bean id="myJdbcTemplate" class="de.antrophos.spring.demo.old.DataSourceInitialization"
+        factory-method="getMyJdbcTemplate">
+        <constructor-arg ref="myDataSource" />
+    </bean>
 
     <bean id="myService" class="de.antrophos.spring.demo.old.MyService">
         <constructor-arg ref="watchedDirectory" />
+        <constructor-arg ref="myJdbcTemplate" />
     </bean>
 
     <bean id="watchedDirectory" class="java.lang.String">
@@ -22,8 +34,10 @@
     <int-file:inbound-channel-adapter directory="${watched.directory}" channel="inputFile"
         auto-startup="true" prevent-duplicates="true"></int-file:inbound-channel-adapter>
 
-    <int-file:file-to-string-transformer id="FileReader" input-channel="inputFile" delete-files="true" output-channel="inputString"/>
+    <int-file:file-to-string-transformer id="FileReader" input-channel="inputFile"
+        delete-files="true" output-channel="inputString" />
 
     <int:service-activator input-channel="inputString" ref="myService" method="receiveMessage" />
-    <int:transformer input-channel="inputString" output-channel="outputString" expression="'Processed: ' + payload" />
+    <int:transformer input-channel="inputString" output-channel="outputString"
+        expression="'Processed: ' + payload" />
 </beans>
